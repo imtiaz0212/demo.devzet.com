@@ -31,10 +31,6 @@ jobs:
             cd /home/devzet-demo/htdocs/demo.devzet.com
             git pull origin main
 
-            # For Node.js Projects
-            npm install
-            npm run build
-
             # For PHP Projects (Laravel, etc.)
             composer install --no-dev --optimize-autoloader
             php artisan migrate --force
