@@ -27,14 +27,9 @@ jobs:
       # Step 3: Deploy to CloudPanel VPS
       - name: Deploy Project
         run: |
-          ssh -o StrictHostKeyChecking=no -tt ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
-            cd /home/devzet-demo/htdocs/demo.devzet.com
-            git pull origin main
-
-            # For PHP Projects (Laravel, etc.)
-            composer install --no-dev --optimize-autoloader
-            php artisan migrate --force
-
-            # Restart the process if necessary
-            sudo systemctl restart nginx
-          EOF
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+          "cd /home/devzet-demo/htdocs/demo.devzet.com && \
+          git pull origin main && \
+          composer install --no-dev --optimize-autoloader && \
+          php artisan migrate --force && \
+          sudo systemctl restart nginx"
