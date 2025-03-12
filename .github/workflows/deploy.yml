@@ -10,24 +10,31 @@ permissions:
 
 jobs:
   deploy:
+    name: Deploy to CloudPanel VPS
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      # Step 1: Checkout the repository
+      - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Set up SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+      # Step 2: Set up SSH Key
+      - name: Setup SSH Key
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
 
-      - name: Push changes
+      # Step 3: Deploy to CloudPanel VPS
+      - name: Deploy Project
         run: |
-          git config --global user.name "imtiaz0212"
-          git config --global user.email "imtiaz0212@gmail.com"
-          git remote set-url origin git@github.com:imtiaz0212/laravel-git-action.git
-          git add .
-          git commit -m "Automated commit from GitHub Actions"
-          git push origin main
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+            cd /home/devzet-demo/htdocs/demo.devzet.com
+            git pull origin main
+
+            # For PHP Projects (Laravel, etc.)
+            composer install --no-dev --optimize-autoloader
+            php artisan migrate --force
+
+            # Restart the process if necessary
+            sudo systemctl restart nginx
+          EOF
