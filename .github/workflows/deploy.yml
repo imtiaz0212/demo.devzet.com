@@ -27,7 +27,7 @@ jobs:
       # Step 3: Deploy to CloudPanel VPS
       - name: Deploy Project
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no -tt ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
             cd /home/devzet-demo/htdocs/demo.devzet.com
             git pull origin main
 
