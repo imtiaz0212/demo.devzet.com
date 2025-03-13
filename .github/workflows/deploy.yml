@@ -1,43 +1,25 @@
-name: Deploy to CloudPanel
+name: Deploy
 
+# Trigger the workflow on push and
+# pull request events on the master branch
 on:
   push:
-    branches:
-      - main  # Change to your deployment branch
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
 
-permissions:
-  contents: read
-
+# Authenticate to the the server via ssh
+# and run our deployment script
 jobs:
   deploy:
-    name: Deploy to CloudPanel VPS
     runs-on: ubuntu-latest
-
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      # Step 2: Set up SSH Key
-      - name: Setup SSH Key
-        uses: webfactory/ssh-agent@v0.8.0
+      - uses: actions/checkout@v3
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@master
         with:
-          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
-
-      # Step 3: Deploy to CloudPanel VPS
-      - name: Deploy Project
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
-            cd /home/devzet-demo/htdocs/demo.devzet.com
-            git pull origin main
-
-            # For PHP Projects (Laravel, etc.)
-            composer install --no-dev --optimize-autoloader
-            php artisan migrate --force
-
-            # Restart the process if necessary
-            php artisan optimize:clear
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
-          EOF
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          #port: ${{ secrets.VPS_PORT }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: "cd /home/devzet-demo/htdocs/demo.devzet.com && ./.scripts/deploy.sh"
