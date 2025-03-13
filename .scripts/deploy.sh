@@ -21,7 +21,7 @@ php artisan config:clear
 php artisan optimize
 
 # Run database migrations
-php artisan migrate --force
+php artisan migrate
 
 # Turn OFF Maintenance mode
 php artisan up
